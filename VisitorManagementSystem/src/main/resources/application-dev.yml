@@ -1,0 +1,105 @@
+# application-dev.yml (updated)
+
+server:
+  port: 8099
+  address: 0.0.0.0
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+  error:
+    include-message: always
+    include-binding-errors: always
+
+spring:
+  jackson:
+    time-zone: UTC
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${GMAIL_USER:}
+    password: ${GMAIL_APP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+        debug: false
+    test-connection: true
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/visitorManagementSystem?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password: "Jazimsafa10@"
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      pool-name: VMS-HikariPool
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 30000
+      connection-timeout: 30000
+      max-lifetime: 1800000
+      connection-init-sql: "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci"
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+logging:
+  level:
+    org.springframework.web: warn
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: OFF
+    org.hibernate.type.descriptor.sql.BasicBinder: OFF
+
+storage:
+  root: uploads
+  public-base-url: http://localhost:8099/files
+
+app:
+  pass:
+    scan-base-url: "http://192.168.0.224/rkt/public/passes/scan"
+    qr-secret: "dev-very-secret-change-me"
+    qr-ttl-seconds: 7200
+    default-validity-minutes: 120
+    gate-no: "GATE-1"
+    web-same-day-only: true
+    web-same-day-mode: reject
+
+  office:
+    timezone: "Asia/Kolkata"
+    close-hour: 20
+
+  frontend:
+    approval-base-url: "https://rkt.visitors.com/approve"
+
+  backend:
+    respond-redirect-url: "http://192.168.0.224:8099/rkt/visitors/respond-redirect"
+
+  mail:
+    enabled: true
+    from: ${GMAIL_USER:${spring.mail.username:}}
+
+    subject-template: "[Visitor Pass] %s"
+    body-template: |
+      Hi %s,
+
+      Your visitor pass has been generated. Please find the PDF attached.
+      Show the QR at the gate for check-in/out.
+
+      Regards,
+      Security Desk
+
+    # backend approval endpoint (the one accept direct clicks):
+    approval-backend-url: "http://192.168.0.224:8099/rkt/visitors/respond"
