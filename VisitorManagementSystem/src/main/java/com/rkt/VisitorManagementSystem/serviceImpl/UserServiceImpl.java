@@ -5,10 +5,7 @@ import com.rkt.VisitorManagementSystem.dto.responseDto.UserResponseDto;
 import com.rkt.VisitorManagementSystem.entity.DepartmentEntity;
 import com.rkt.VisitorManagementSystem.entity.RoleEntity;
 import com.rkt.VisitorManagementSystem.entity.UserEntity;
-import com.rkt.VisitorManagementSystem.exception.customException.DuplicateResourceException;
-import com.rkt.VisitorManagementSystem.exception.customException.EntityInUseException;
-import com.rkt.VisitorManagementSystem.exception.customException.ResourceNotFoundException;
-import com.rkt.VisitorManagementSystem.exception.customException.RoleDepartmentMismatchException;
+import com.rkt.VisitorManagementSystem.exception.customException.*;
 import com.rkt.VisitorManagementSystem.mapper.UserMapper;
 import com.rkt.VisitorManagementSystem.repository.DepartmentRepository;
 import com.rkt.VisitorManagementSystem.repository.RoleRepository;
@@ -18,6 +15,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -188,6 +188,32 @@ public class UserServiceImpl implements UserService {
 
         Page<UserEntity> page = userRepository.searchUsersNative(users,dept, rName, isActive,pageable);
         return page.map(mapper::toResponse);
+    }
+
+    @Override
+    public UserEntity getUserByToken() {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if(auth == null || !auth.isAuthenticated())
+        {
+            throw new UnauthorizedException("User is not authenticated");
+        }
+
+        Object principal = auth.getPrincipal();
+
+        String email;
+
+        if(principal instanceof UserDetails)
+        {
+            email = ((UserDetails) principal).getUsername();
+        }
+        else {
+            email = auth.getName();
+        }
+
+        return userRepository.findWithRoleByEmail(email).orElseThrow(()-> new ResourceNotFoundException("User not found with email : " + email));
+
     }
 
 }

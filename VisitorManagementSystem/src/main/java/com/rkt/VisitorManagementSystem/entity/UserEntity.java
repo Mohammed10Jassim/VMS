@@ -42,6 +42,7 @@ public class UserEntity {
             foreignKey = @ForeignKey(name = "fk_user_department"))
     private DepartmentEntity department;
 
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "role_id",
             nullable = false,

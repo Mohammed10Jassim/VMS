@@ -1,8 +1,9 @@
 package com.rkt.VisitorManagementSystem.service;
 
+import com.rkt.VisitorManagementSystem.dto.responseDto.DashboardCountsDto;
 import com.rkt.VisitorManagementSystem.dto.responseDto.VisitStatusCountsDto;
 
 public interface DashboardService {
 
-     VisitStatusCountsDto getVisitStatusCounts();
+    DashboardCountsDto getVisitStatusCounts(Integer year, Integer month);
 }

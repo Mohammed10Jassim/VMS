@@ -99,18 +99,37 @@ public interface VisitorRepository extends JpaRepository<VisitorEntity, Long>, J
       """)
     int confirmRejectByVisitor(@Param("visitorId") Long visitorId, @Param("now") Instant now);
 
+    @Query(value = """
+        SELECT
+        SUM(CASE WHEN v.visit_status = 'PENDING' THEN 1 ELSE 0 END) AS pending,
+        SUM(CASE WHEN v.visit_status = 'APPROVED' THEN 1 ELSE 0 END) AS approved,
+        SUM(CASE WHEN v.visit_status = 'REJECTED' THEN 1 ELSE 0 END) AS rejected,
+        SUM(CASE WHEN v.visit_status = 'CHECKED_IN' THEN 1 ELSE 0 END) AS checked_in,
+        SUM(CASE WHEN v.visit_status = 'CHECKED_OUT' THEN 1 ELSE 0 END) AS checked_out,
+        COUNT(*) AS total_visitors_count,
+        (SELECT COUNT(*) FROM users) AS total_users_count
+        FROM visitors v
+        WHERE
+        (:year IS NULL OR YEAR(v.visit_date) = :year)
+        AND (:month IS NULL OR MONTH(v.visit_date) = :month)
+        """, nativeQuery = true)
+    Map<String,Object> fetchOverallVisitorStatusCounts(@Param("year") Integer year, @Param("month") Integer month);
 
 
-    @Query(value = "SELECT " +
-            "SUM(CASE WHEN visit_status = 'PENDING' THEN 1 ELSE 0 END) AS pending, " +
-            "SUM(CASE WHEN visit_status = 'APPROVED' THEN 1 ELSE 0 END) AS approved, " +
-            "SUM(CASE WHEN visit_status= 'REJECTED' THEN 1 ELSE 0 END) AS rejected, " +
-            "SUM(CASE WHEN visit_status = 'CHECKED_IN' THEN 1 ELSE 0 END) AS checked_in, " +
-            "SUM(CASE WHEN visit_status = 'CHECKED_OUT' THEN 1 ELSE 0 END) AS checked_out, " +
-            "COUNT(*) AS total_visitors_count, " +
-            "(SELECT COUNT(*) FROM users) AS total_users_count " +
-            "FROM visitors", nativeQuery = true)
-    Map<String, Object> fetchVisitStatusCounts();
+    @Query(value = """
+        SELECT
+        SUM(CASE WHEN v.visit_status = 'PENDING' THEN 1 ELSE 0 END) AS pending,
+        SUM(CASE WHEN v.visit_status = 'APPROVED' THEN 1 ELSE 0 END) AS approved,
+        SUM(CASE WHEN v.visit_status = 'REJECTED' THEN 1 ELSE 0 END) AS rejected,
+        SUM(CASE WHEN v.visit_status = 'CHECKED_IN' THEN 1 ELSE 0 END) AS checked_in,
+        SUM(CASE WHEN v.visit_status = 'CHECKED_OUT' THEN 1 ELSE 0 END) AS checked_out,
+        COUNT(*) AS total_visitors_count
+        FROM visitors v
+        WHERE v.person_to_meet_id = :userId
+        AND (:year IS NULL OR YEAR(v.visit_date) = :year)
+        AND (:month IS NULL OR MONTH(v.visit_date) = :month)
+        """, nativeQuery = true)
+    Map<String,Object> fetchMyVisitorStatusCounts(@Param("userId") Long userId, @Param("year") Integer year, @Param("month") Integer month);
 
     @Modifying
     @Query("""

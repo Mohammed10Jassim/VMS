@@ -4,6 +4,7 @@ package com.rkt.VisitorManagementSystem.service;
 import com.rkt.VisitorManagementSystem.dto.UserDepartmentDto;
 import com.rkt.VisitorManagementSystem.dto.UserDto;
 import com.rkt.VisitorManagementSystem.dto.responseDto.UserResponseDto;
+import com.rkt.VisitorManagementSystem.entity.UserEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -30,4 +31,5 @@ public interface UserService {
                                  String roleName,
                                  Boolean isActive);
 
+    UserEntity getUserByToken();
 }
